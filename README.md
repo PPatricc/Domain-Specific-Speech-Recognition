@@ -17,17 +17,17 @@ pip install -r requirements.txt
 
 ## Folder Structure
 .
-├─ data/
-│  ├─ noise_samples/
-│  ├─ generated_synthetic_data/  # will store the final dataset
-│  └─ test/                  # TTS-generated audio for evaluation
-├─ src/
-│  ├─ data_preprocessing.py  # audio preprocessing
-│  ├─ dataset_creation.py    # dataset generation
-│  ├─ finetune_lora.py       # LoRA fine-tuning
-│  └─ evaluation.py          # final evaluation script
-├─ requirements.txt
-└─ README.md
+├─ data/<br/> 
+│  ├─ noise_samples/<br/> 
+│  ├─ generated_synthetic_data/<br/> 
+│  └─ test/<br/> 
+├─ src/<br/> 
+│  ├─ data_preprocessing.py<br/> 
+│  ├─ dataset_creation.py<br/> 
+│  ├─ finetune_lora.py<br/> 
+│  └─ evaluation.py<br/> 
+├─ requirements.txt<br/> 
+└─ README.md<br/> 
 
 
 ## Steps
@@ -48,10 +48,10 @@ python src/evaluation.py
 
 
 ### Customization
-Number of epochs: Adjust num_epochs in finetune_lora.py if you want more training.
-Batch size: Increase it if you have a good GPU or reduce if you run out of memory.
-Noise mixing: Tweak the SNR range or add additional noise files to get more variety.
-VAD threshold**: In data_preprocessing.py, you can modify threshold=0.02 to be more or less aggressive in boosting speech frames.
+- Number of epochs: Adjust num_epochs in finetune_lora.py if you want more training.<br/> 
+- Batch size: Increase it if you have a good GPU or reduce if you run out of memory.<br/> 
+- Noise mixing: Tweak the SNR range or add additional noise files to get more variety.<br/> 
+- VAD threshold**: In data_preprocessing.py, you can modify threshold=0.02 to be more or less aggressive in boosting speech frames.<br/> 
 
 ### Notes
 On Windows, if pyttsx3 fails to generate .wav files, ensure you have SAPI5 voices installed and the correct permissions.
