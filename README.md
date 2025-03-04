@@ -6,6 +6,8 @@ This repository demonstrates how to:
 3. Fine-tune a Whisper model with LoRA.
 4. Evaluate on unseen test data, including logging WER and domain-specific term accuracy.
 
+ Quick Note: If you do not want to train the model yourself, you can use this one (10 epochs trained): https://drive.google.com/file/d/1dV1jqDTSRcdWmeVHzs_7esEE5Bqbqg5g/view?usp=drive_link . Please make sure to unzip the folder contents into lora_whisper_model folder.
+
 ## Prerequisites
 
 - Python 3.8+ recommended
@@ -16,7 +18,8 @@ pip install -r requirements.txt
 ```
 
 ## Folder Structure
-.
+.<br/>
+├─ lora_whisper_model/<br/> 
 ├─ data/<br/> 
 │  ├─ noise_samples/<br/> 
 │  ├─ generated_synthetic_data/<br/> 
@@ -36,7 +39,7 @@ pip install -r requirements.txt
 python src/dataset_creation.py
 ```
 
-2. Fine-Tune the Model with LoRA (data preprocessing included)
+2. Fine-Tune the Model with LoRA (data preprocessing included) - please remember to delete the placeholder in the folder and do not omit this step, as the model size is to big to be pushed to github repository.
 ```bash
 python src/finetune_lora.py
 ```
