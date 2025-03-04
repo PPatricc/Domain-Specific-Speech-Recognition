@@ -206,7 +206,6 @@ if __name__ == "__main__":
         print("\n=== Comparison of Baseline vs Fine-Tuned ===")
         print(f"Baseline WER: {baseline_metrics['avg_wer']:.4f}")
         print(f"Fine-Tuned WER: {tuned_metrics['avg_wer']:.4f}")
-        print(f"Baseline Domain-Term Acc: {baseline_metrics['avg_domain_term_accuracy']:.4f}")
         print(f"Fine-Tuned Domain-Term Acc: {tuned_metrics['avg_domain_term_accuracy']:.4f}")
         print(f"Prediction count: {baseline_metrics['predictions_count']} baseline, {tuned_metrics['predictions_count']} tuned")
 

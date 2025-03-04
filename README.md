@@ -46,6 +46,10 @@ python src/finetune_lora.py
 python src/evaluation.py
 ```
 
+4. (Optional) Try the inference with your own voice recording
+```bash
+python inference.py --model_dir lora_whisper_model --audio_path your_audio_file.wav
+```
 
 ### Customization
 - Number of epochs: Adjust num_epochs in finetune_lora.py if you want more training.<br/> 
