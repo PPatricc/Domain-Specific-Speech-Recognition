@@ -1,4 +1,5 @@
 import os
+import csv
 import logging
 import numpy as np
 import torchaudio
@@ -11,6 +12,57 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s"
 )
+
+def load_real_recordings(
+    real_data_csv="data/real_recordings/real_data.csv",
+    audio_dir="data/real_recordings",
+    sr=16000
+):
+    """
+    Load real voice recordings based on a CSV listing of (filename, transcript).
+
+    Args:
+        real_data_csv (str): Path to a CSV file with columns: [filename, transcript].
+        audio_dir (str): Directory containing the .wav files mentioned in the CSV.
+        sr (int): Sampling rate to which we resample audio.
+
+    Returns:
+        List[dict]: A list of dict entries with fields:
+          "text", "audio", "sampling_rate", "noise_file", "snr_db"
+    """
+    entries = []
+    if not os.path.exists(real_data_csv):
+        logging.info(f"No CSV found at {real_data_csv}, skipping real data.")
+        return entries
+
+    logging.info(f"Loading real recordings from CSV: {real_data_csv}")
+    with open(real_data_csv, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            logging.info(row)
+            wav_path = os.path.join(audio_dir, row["filename"])
+            if not os.path.exists(wav_path):
+                logging.warning(f"Audio file not found: {wav_path}, skipping.")
+                continue
+
+            # Load the real audio
+            audio, orig_sr = librosa.load(wav_path, sr=sr)
+            # Convert to float32 if needed
+            audio = audio.astype(np.float32)
+            
+            transcript = row["transcript"]
+            
+            # We'll store "real_data" or something for noise_file
+            entries.append({
+                "text": transcript,
+                "audio": audio,
+                "sampling_rate": sr,
+                "noise_file": "real_data",
+                "snr_db": 0  # or some placeholder
+            })
+
+    logging.info(f"Loaded {len(entries)} real recordings from CSV.")
+    return entries
 
 def text_to_speech(text, sr=16000):
     """
@@ -67,6 +119,7 @@ def create_synthetic_sample(text, background_noise_path=None, snr_db=10, sr=1600
         
         noise = noise.numpy().squeeze()
         
+        # If noise is shorter than speech, loop it
         if len(noise) < len(speech_array):
             repeats = int(np.ceil(len(speech_array) / len(noise)))
             noise = np.tile(noise, repeats)
@@ -85,11 +138,13 @@ def create_synthetic_sample(text, background_noise_path=None, snr_db=10, sr=1600
 
 def generate_dataset():
     """
-    Generate a synthetic dataset of domain-specific (police) phrases
-    combined with optional noise. Returns a Hugging Face Dataset object.
+    Generate a dataset that includes:
+      1) Synthetic TTS data with optional noise (various SNRs).
+      2) Real recordings loaded from data/real_recordings/real_data.csv (if present).
 
     Returns:
-        datasets.Dataset: The created dataset with fields: text, audio, sampling_rate, noise_file, snr_db.
+        datasets.Dataset: The combined dataset with fields:
+          text, audio, sampling_rate, noise_file, snr_db.
     """
     logging.info("Starting dataset generation...")
     
@@ -117,11 +172,12 @@ def generate_dataset():
         "data/noise_samples/crowd_noise.wav"
     ]
     
-    logging.info("Loading Whisper processor...")
+    logging.info("Loading Whisper processor for consistency (though not strictly needed here).")
     processor = AutoProcessor.from_pretrained("openai/whisper-small")
     
     dataset_entries = []
     
+    # --- 1) Synthetic TTS with optional noise
     for phrase in police_phrases:
         for noise_file in noise_files:
             for snr in [5, 10, 15]:
@@ -145,7 +201,19 @@ def generate_dataset():
                         f"Failed to create sample for phrase='{phrase}' "
                         f"noise='{noise_file}' snr_db={snr}: {e}"
                     )
-    
+
+    # --- 2) Load real voice recordings (if any)
+    real_entries = load_real_recordings(
+        real_data_csv="data/real_recordings/real_data.csv",
+        audio_dir="data/real_recordings",
+        sr=16000
+    )
+    logging.info(f"Loaded {len(real_entries)} real recordings.")
+
+    # Combine synthetic + real data
+    dataset_entries.extend(real_entries)
+
+    # --- Convert to a Hugging Face dataset
     dataset_dict = {
         "text": [e["text"] for e in dataset_entries],
         "audio": [e["audio"] for e in dataset_entries],
@@ -155,7 +223,7 @@ def generate_dataset():
     }
     
     hf_dataset = Dataset.from_dict(dataset_dict)
-    logging.info(f"Dataset created with {len(hf_dataset)} entries.")
+    logging.info(f"Dataset created with {len(hf_dataset)} entries (TTS + real).")
     return hf_dataset
 
 if __name__ == "__main__":

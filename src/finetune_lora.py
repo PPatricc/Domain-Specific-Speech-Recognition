@@ -151,7 +151,7 @@ def train_lora():
         logging.info(f"Using device: {device}")
 
         optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
-        num_epochs = 1  # For demonstration
+        num_epochs = 10
         logging.info(f"Starting training for {num_epochs} epoch(s).")
 
         for epoch in range(num_epochs):
